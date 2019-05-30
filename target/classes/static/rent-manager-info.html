@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>自行车管理系统-车辆租借信息管理</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="assets/css/rent-manager-all.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+  <script type="text/javascript" src="assets/js/rent-manager-all.js"></script>
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+   <script>
+	
+	$(function() { 
+		getInformations();
+	});
+	
+	function getInformations() {
+		$.get("/InformationCon/getInformations.do",
+			    function(data){
+						var str = "";
+						if (data.length) {
+						      for(i = 0; i < data.length; i++){
+						        	str +=`<li class="list-group-item">${data[i].info_content}&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-link" onclick="updateInformationStatus(${data[i].info_id})">已读</button></li>`
+						        	};
+						} else {
+							str +=`<li class="list-group-item">没有未读的消息</li>`
+						}
+				      
+				      $("#mesContent").html(str);
+			    },"json");
+	}
+	
+	
+	
+	function updateInformationStatus(id) {
+		$.post("/InformationCon/updateInformationStatus.do", {info_id:id},function(data){
+			  location.reload();
+		      alert("操作成功");
+		    });
+	}
+</script>
+</head>
+<body>
+
+<div class="header">
+  <ul class="nav justify-content-end nav-self-style">
+    <li class="nav-item">
+      <a class="nav-link" href="#"><img src="assets/images/user-icon.png" width="20px" height="20px"> 消息通知</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="RentManagerLogout()"><img src="assets/images/logout-icon.png" width="20px" height="20px"> 退出</a>
+    </li>
+  </ul>
+</div>
+
+<div class="left-side nav-left-side">
+  <ul class="nav nav-pills flex-column">
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-rbm.html">车辆租借管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-rbs.html">车辆状况管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-rm.html">租借点管理员管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active" href="rent-manager-info.html">消息通知</a>
+    </li>
+  </ul>
+</div>
+
+<!-- Tab panes -->
+<div class="content-side">
+    <ul class="list-group" id="mesContent">
+	</ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>自行车管理系统-车辆租借信息管理</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="assets/css/rent-manager-all.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+  <script type="text/javascript" src="assets/js/rent-manager-all.js"></script>
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+   <script>
+    var page=1; 
+    var isEnd=0;
+	function getAllRentA_BicycleManagerToPrevious() {
+		if(page>=2){
+			page--;
+		}
+		getRentA_BicycleManagerByPage();
+	}
+	
+	function getAllRentA_BicycleManagerToNext() {
+		page++;
+		getRentA_BicycleManagerByPage();
+	}
+	
+	function getLocalTime(nS) {     
+	   return new Date(parseInt(nS)).toLocaleString().replace(/:\d{1,2}$/,' ');     
+	}
+	
+	$(function() { 
+		getRentA_BicycleManagerByPage();
+	});
+	
+	function getRentA_BicycleManagerByPage() {
+		$.get("/RentA_BicycleManagerCon/getRentA_BicycleManagerByPage.do",{pageNum:page},
+			    function(data){
+						if(data.length){
+							isEnd = page;
+						      var str = "";
+						      for(i = 0; i < data.length; i++){
+						        	str +=`<tr>
+							        	<td>${data[i].rbm_id}</td>
+							        	<td>${data[i].rbm_bp_id}</td>
+							        	<td>${data[i].rbm_hirer_name}</td>
+							        	<td>${data[i].rbm_hirer_contact}</td>
+						        		<td>${data[i].rbm_hire_location}</td>
+						        		<td>${data[i].rbm_persent_location || ""}</td>
+						        		<td>${data[i].rbm_hirer_ID || ""}</td>
+						        		<td>${data[i].rbm_hirer_deposit}</td>
+						        		<td>${data[i].rbm_ischarge}</td>
+						        		<td>${data[i].rbm_hirer_pay || ""}</td>
+						        		<td>${data[i].rbm_istrouble}</td>
+						        		<td>${data[i].rbm_damage || ""}</td>`
+						        		
+						        		if (data[i].rbm_retrieve_time == null) {
+						        			str +=`<td><button type="button" onclick="deleteRentA_BicycleManager(${data[i].rbm_id})" class="btn btn-primary">删除</button>
+								        		<button type="button" onclick="getRentA_BicycleManagerByIdForUpdate(${data[i].rbm_id})" class="btn btn-primary" data-toggle="modal" data-target="#updateModal">编辑</button></td></tr>`
+						        		} else {
+						        			str +=`<td><button type="button" onclick="getRentA_BicycleManagerByIdForDetail(${data[i].rbm_id})" class="btn btn-primary" data-toggle="modal" data-target="#detailModal">查看</button></td></tr>`
+						        		}
+						        	};
+						      $("#mesContent").html(str);
+						} else {
+							page = isEnd;
+						}
+			    },"json");
+	}
+	
+	function getRentA_BicycleManagerByCondition() {
+		$.get("/RentA_BicycleManagerCon/getRentA_BicycleManagerByCondition.do", {
+			rbm_bp_id: $("input[name='findByRBM_BP_Id']").val(), 
+			rbm_hirer_name: $("input[name='findByRBM_Hirer_Name']").val(), 
+			rbm_hirer_contact: $("input[name='findByRBM_Hirer_Contact']").val(),
+			rbm_hirer_ID: $("input[name='findByRBM_Hirer_ID']").val()
+			},function(data){
+				if(data.length){
+					isEnd = page;
+						 var str = "";
+						 for(i = 0; i < data.length; i++){
+					        	str +=`<tr>
+					        		<td>${data[i].rbm_id}</td>
+						        	<td>${data[i].rbm_bp_id}</td>
+						        	<td>${data[i].rbm_hirer_name}</td>
+						        	<td>${data[i].rbm_hirer_contact}</td>
+					        		<td>${data[i].rbm_hire_location}</td>
+					        		<td>${data[i].rbm_persent_location || ""}</td>
+					        		<td>${data[i].rbm_hirer_ID || ""}</td>
+					        		<td>${data[i].rbm_hirer_deposit}</td>
+					        		<td>${data[i].rbm_ischarge}</td>
+					        		<td>${data[i].rbm_hirer_pay || ""}</td>
+					        		<td>${data[i].rbm_istrouble || ""}</td>
+					        		<td>${data[i].rbm_damage || ""}</td>
+					        		<td><button type="button" onclick="deleteRentA_BicycleManager(${data[i].rbm_id})" class="btn btn-primary">删除</button>
+					        		<button type="button" onclick="getRentA_BicycleManagerByIdForUpdate(${data[i].rbm_id})" class="btn btn-primary" data-toggle="modal" data-target="#updateModal">编辑</button></td></tr>`
+					        	};
+						      $("#mesContent").html(str);
+						} else {
+							page = isEnd;
+							alert("未找到")
+						}
+			    },"json");
+	}
+	
+	function addRentA_BicycleManager() {
+		$.post("/RentA_BicycleManagerCon/addRentA_BicycleManager.do", {
+			rbm_bp_id: $("input[name='add_rbm_bp_id']").val(),
+			rbm_hirer_name: $("input[name='add_rbm_hirer_name']").val(),
+			rbm_hirer_contact: $("input[name='add_rbm_hirer_contact']").val(),
+			rbm_hirer_ID: $("input[name='add_rbm_hirer_ID']").val(),
+			rbm_hirer_deposit: $("input[name='add_rbm_hirer_deposit']:checked").val()
+			},function(data){
+						if (data == true) {
+							  location.reload();
+							  alert("添加成功");
+						} else {
+							alert("添加失败，车辆已被租借或你所在租借点没有此车辆或处于修理状态");
+						}
+			    });
+	}
+	
+	function getRentA_BicycleManagerByIdForUpdate(id) {
+		$.post("/RentA_BicycleManagerCon/getRentA_BicycleManagerById.do", {rbm_id:id},function(data){
+				$("#update_rbm_id").val(data.rbm_id);
+				$("#update_rbm_hire_time").val(data.rbm_hire_time);
+				$("#update_rbm_persent_location").val(data.rbm_persent_location);
+				$("#update_rbm_ischarge").attr("checked", data.rbm_ischarge);
+				$("#update_rbm_hirer_pay").val(data.rbm_hirer_pay);
+				$("#update_rbm_istrouble").attr("checked", data.rbm_istrouble);
+				$("#update_rbm_damage").val(data.rbm_damage);  
+				commonTime = $("#update_rbm_hire_time").val().toLocaleString();
+				$("#update_rbm_hire_time").val(getLocalTime(commonTime));
+			    });
+	}
+	
+	function getRentA_BicycleManagerByIdForDetail(id) {
+		$.post("/RentA_BicycleManagerCon/getRentA_BicycleManagerById.do", {rbm_id:id},function(data){
+				$("#detail_rbm_id").val(data.rbm_id);
+				$("#detail_rbm_bp_id").val(data.rbm_bp_id);
+				$("#detail_rbm_hirer_name").val(data.rbm_hirer_name);
+				$("#detail_rbm_hirer_contact").val(data.rbm_hirer_contact);
+				$("#detail_rbm_hire_location").val(data.rbm_hire_location);
+				$("#detail_rbm_persent_location").val(data.rbm_persent_location);
+				$("#detail_rbm_hire_time").val(data.rbm_hire_time);
+				$("#detail_rbm_retrieve_time").val(data.rbm_retrieve_time);
+				$("#detail_rbm_hirer_ID").val(data.rbm_hirer_ID);
+				$("#detail_rbm_hirer_deposit").val(data.rbm_hirer_deposit);
+				$("#detail_rbm_hirer_pay").val(data.rbm_hirer_pay);
+				$("#detail_rbm_damage").val(data.rbm_damage);
+				commonTime = $("#detail_rbm_hire_time").val().toLocaleString();
+				$("#detail_rbm_hire_time").val(getLocalTime(commonTime));
+				commonTime2 = $("#detail_rbm_retrieve_time").val().toLocaleString();
+				$("#detail_rbm_retrieve_time").val(getLocalTime(commonTime2));
+			    });
+	}
+	
+	function updateRentA_BicycleManager() {
+		$.post("/RentA_BicycleManagerCon/updateRentA_BicycleManager.do", {
+			rbm_id: $("input[name='update_rbm_id']").val(),
+			rbm_persent_location: $("input[name='update_rbm_persent_location']").val(),
+			rbm_ischarge: $("input[name='update_rbm_ischarge']:checked").val(),
+			rbm_hirer_pay: $("input[name='update_rbm_hirer_pay']").val(),
+			rbm_istrouble: $("input[name='update_rbm_istrouble']:checked").val(),
+			rbm_damage: $("input[name='update_rbm_damage']").val(),
+			},function(data){
+				  location.reload();
+				  alert("修改成功");
+			    });
+	}
+	
+	function deleteRentA_BicycleManager(id) {
+		$.post("/RentA_BicycleManagerCon/deleteRentA_BicycleManager.do", {rbm_id:id},function(data){
+				  location.reload();
+			      alert("删除成功");
+			    });
+	}
+</script>
+</head>
+<body>
+
+<div class="header">
+  <ul class="nav justify-content-end nav-self-style">
+    <li class="nav-item">
+      <a class="nav-link" href="#"><img src="assets/images/user-icon.png" width="20px" height="20px"> 车辆租借信息</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="RentManagerLogout()"><img src="assets/images/logout-icon.png" width="20px" height="20px"> 退出</a>
+    </li>
+  </ul>
+</div>
+
+<div class="left-side nav-left-side">
+  <ul class="nav nav-pills flex-column">
+    <li class="nav-item">
+      <a class="nav-link active" href="rent-manager-rbm.html">车辆租借管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-rbs.html">车辆状况管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-rm.html">租借点管理员管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-info.html">消息通知</a>
+    </li>
+  </ul>
+</div>
+
+<!-- Tab panes -->
+<div class="content-side">
+    <div class="above">
+      <form class="form-inline">
+        <input type="text" class="form-control condition" name="findByRBM_BP_Id" placeholder="车辆ID">&nbsp;&nbsp;
+        <input type="text" class="form-control condition" name="findByRBM_Hirer_Name" placeholder="租借人名称">&nbsp;&nbsp;
+        <input type="text" class="form-control condition" name="findByRBM_Hirer_Contact" placeholder="手机号码">&nbsp;&nbsp;
+        <input type="text" class="form-control condition" name="findByRBM_Hirer_ID" placeholder="身份证号码">&nbsp;&nbsp;
+        <button type="button" class="btn btn-primary" onclick="getRentA_BicycleManagerByCondition()">搜索</button>
+      </form>
+    </div>
+    <div class="between">
+      <button type="button" class="btn btn-primary"  onclick="getRentA_BicycleManagerByPage()">查询</button>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">新增</button>
+      <button type="button" class="btn btn-primary"  onclick="getAllRentA_BicycleManagerToPrevious()">上一页</button>
+      <button type="button" class="btn btn-primary"  onclick="getAllRentA_BicycleManagerToNext()">下一页</button>
+    </div>
+    <div class="below">
+      <div id="table-mes">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>序号ID</th>
+              <th>车辆ID</th>
+              <th>借车人姓名</th>
+              <th>手机号码</th>
+              <th>借出的租借点</th>
+              <th>还车的租借点</th>
+              <th>登记身份证号码</th>
+              <th>是否收取押金</th>
+              <th>是否要收费</th>
+              <th>缴费</th>
+              <th>是否损坏</th>
+              <th>赔偿</th>
+              <th>options</th>
+            </tr>
+          </thead>
+          <tbody id="mesContent">
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+
+<!-- 新增车辆租借信息模态框 -->
+  <div class="modal fade" id="addModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+   
+        <!-- 新增车辆租借信息模态框头部 -->
+        <div class="modal-header">
+          <h4 class="modal-title">新增车辆租借信息</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+   
+        <!-- 新增车辆租借信息模态框主体 -->
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="rbm_bp_id">车辆ID:</label>
+              <input type="text" class="form-control" id="add_rbm_bp_id" name="add_rbm_bp_id">
+            </div>
+            <div class="form-group">
+              <label for="rbm_hirer_name">租借人姓名:</label>
+              <input type="text" class="form-control" id="add_rbm_hirer_name" name="add_rbm_hirer_name" maxlength="12" >
+            </div>
+            <div class="form-group">
+              <label for="rbm_hirer_contact">手机号码:</label>
+              <input type="text" class="form-control" id="add_rbm_hirer_contact" name="add_rbm_hirer_contact" maxlength="11" >
+            </div>
+            <div class="form-group">
+              <label for="rbm_hirer_ID">租借人身份证号码:</label>
+              <input type="text" class="form-control" id="add_rbm_hirer_ID" name="add_rbm_hirer_ID" maxlength="18" >
+            </div>
+            <div class="form-check">
+		      <label class="rbm_hirer_deposit">
+		        <input type="checkbox" class="form-check-input" id="add_rbm_hirer_deposit" name="add_rbm_hirer_deposit">是否收取押金
+		      </label>
+		    </div>
+          </form>
+        </div>
+   
+        <!-- 新增车辆租借信息模态框底部 -->
+        <div class="modal-footer">
+          <button type="button" onclick="addRentA_BicycleManager()" class="btn btn-primary">确定</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        </div>
+   
+      </div>
+    </div>
+  </div>
+
+<!-- 编辑车辆租借信息模态框 -->
+  <div class="modal fade" id="updateModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+   
+        <!-- 编辑车辆租借信息模态框头部 -->
+        <div class="modal-header">
+          <h4 class="modal-title">编辑车辆租借信息</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+   
+        <!-- 编辑车辆租借信息模态框主体 -->
+        <div class="modal-body">
+          <form>
+          <div class="form-group">
+              <label for="rbm_id">序号ID:</label>
+              <input type="text" class="form-control" id="update_rbm_id" name="update_rbm_id" disabled="disabled">
+            </div>
+          <div class="form-group">
+              <label for="rbm_hire_time">开始使用时间:</label>
+              <input type="text" class="form-control" id="update_rbm_hire_time" name="update_rbm_hire_time" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="rbm_persent_location">还车租借点:</label>
+              <input type="text" class="form-control" id="update_rbm_persent_location" name="update_rbm_persent_location" disabled="disabled">
+            </div>
+            <div class="form-check">
+		      <label class="rbm_ischarge">
+		        <input type="checkbox" class="form-check-input" id="update_rbm_ischarge" name="update_rbm_ischarge">是否需要收费
+		      </label>
+		    </div>
+            <div class="form-group">
+              <label for="rbm_hirer_pay">应缴费:</label>
+              <input type="text" class="form-control" id="update_rbm_hirer_pay" name="update_rbm_hirer_pay">
+            </div>
+            <div class="form-check">
+		      <label class="rbm_istrouble">
+		        <input type="checkbox" class="form-check-input" id="update_rbm_istrouble" name="update_rbm_istrouble">是否损坏
+		      </label>
+		    </div>
+            <div class="form-group">
+              <label for="rbm_damage">应赔偿:</label>
+              <input type="text" class="form-control" id="update_rbm_damage" name="update_rbm_damage">
+            </div>
+          </form>
+        </div>
+   
+        <!-- 编辑车辆租借信息模态框底部 -->
+        <div class="modal-footer">
+          <button type="button" onclick="updateRentA_BicycleManager()" class="btn btn-primary">确定</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        </div>
+   
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- 查看车辆租借信息模态框 -->
+  <div class="modal fade" id="detailModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+   
+        <!-- 查看车辆租借信息模态框头部 -->
+        <div class="modal-header">
+          <h4 class="modal-title">查看车辆租借信息</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+   
+        <!-- 查看车辆租借信息模态框主体 -->
+        <div class="modal-body">
+          <form class="detailModel">
+          <div class="form-group">
+          		<span>序号ID：</span><input id="detail_rbm_id" />
+            </div>
+          <div class="form-group">
+          		<span>车辆使用ID：</span><input id="detail_rbm_bp_id" />
+          </div>
+          <div class="form-group">
+          		<span>姓名：</span><input id="detail_rbm_hirer_name" />
+          </div>
+          <div class="form-group">
+          		<span>联系方式：</span><input id="detail_rbm_hirer_contact" />
+          </div>
+          <div class="form-group">
+          		<span>借出租借点：</span><input id="detail_rbm_hire_location" />
+          </div>
+          <div class="form-group">
+          		<span>还车租借点：</span><input id="detail_rbm_persent_location" />
+          </div>
+          <div class="form-group">
+          		<span>借车时间：</span><input id="detail_rbm_hire_time" />
+          </div>
+          <div class="form-group">
+          		<span>还车时间：</span><input id="detail_rbm_retrieve_time" />
+          </div>
+          <div class="form-group">
+          		<span>身份证号码：</span><input id="detail_rbm_hirer_ID" />
+          </div>
+          <div class="form-group">
+          		<span>押金：</span><input id="detail_rbm_hirer_deposit" />
+          </div>
+          <div class="form-group">
+          		<span>收费：</span><input id="detail_rbm_hirer_pay" />
+          </div>
+          <div class="form-group">
+          		<span>赔偿：</span><input id="detail_rbm_damage" />
+          </div>
+          </form>
+        </div>
+   
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>自行车管理系统-车辆质量信息管理</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="assets/css/rent-manager-all.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+  <script type="text/javascript" src="assets/js/rent-manager-all.js"></script>
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+   <script>
+    var page=1;
+    var isEnd=0;
+	function getAllRentA_BicycleStatusToPrevious() {
+		if(page>=2){
+			page--;
+		}
+		getRentA_BicycleStatusByPage();
+	}
+	
+	function getAllRentA_BicycleStatusToNext() {
+		page++;
+		getRentA_BicycleStatusByPage();
+	}
+	
+	$(function() { 
+		getRentA_BicycleStatusByPage();
+	});
+	
+	function getRentA_BicycleStatusByPage() {
+		$.get("/RentA_BicycleStatusCon/getRentA_BicycleStatusByPage.do",{pageNum:page},
+			    function(data){
+					if(data.length){
+						isEnd = page;
+					      var str = "";
+					      for(i = 0; i < data.length; i++){
+					        	str +=`<tr><td>${data[i].rbs_bp_id}</td><td>${data[i].rbs_bicycle_hire_status}</td><td>${data[i].rbs_bicycle_quality_status}</td>
+					        		<td><button type="button" onclick="getRentA_BicycleStatusByIdForTransfer('${data[i].rbs_bp_id}')" class="btn btn-primary" data-toggle="modal" data-target="#transferModal">转移</button>
+					        		<button type="button" onclick="getRentA_BicycleStatusByIdForUpdate('${data[i].rbs_bp_id}')" class="btn btn-primary" data-toggle="modal" data-target="#updateModal">编辑</button></td></tr>`
+					        	};
+					      $("#mesContent").html(str);
+					} else {
+						page = isEnd;
+					}
+			    },"json");
+	}
+	
+	function getRentA_BicycleStatusByCondition() {
+		$.get("/RentA_BicycleStatusCon/getRentA_BicycleStatusByCondition.do", {
+			rbs_bp_id: $("input[name='findByRBS_BP_Id']").val(), 
+			rbs_bicycle_hire_status: $("input[name='findByRBS_Hire_Status']:checked").val(), 
+			rbs_bicycle_quality_status: $("input[name='findByRBS_Quality_Status']").val()
+			},function(data){
+				if(data.length){
+					isEnd = page;
+						 var str = "";
+						 for(i = 0; i < data.length; i++){
+							 str +=`<tr><td>${data[i].rbs_bp_id}</td><td>${data[i].rbs_bicycle_hire_status}</td><td>${data[i].rbs_bicycle_quality_status}</td>
+					        		<td><button type="button" onclick="getRentA_BicycleStatusByIdForTransfer('${data[i].rbs_bp_id}')" class="btn btn-primary" data-toggle="modal" data-target="#transferModal">转移</button>
+					        		<button type="button" onclick="getRentA_BicycleStatusByIdForUpdate('${data[i].rbs_bp_id}')" class="btn btn-primary" data-toggle="modal" data-target="#updateModal">编辑</button></td></tr>`
+					        	};
+						      $("#mesContent").html(str);
+						} else {
+							page = isEnd;
+						}
+			    },"json");
+	}
+	
+	function getRentA_BicycleStatusByIdForUpdate(str) {
+		$.post("/RentA_BicycleStatusCon/getRentA_BicycleStatusById.do", {rbs_bp_id:str},function(data){
+					$("#update_rbs_bp_id").val(data.rbs_bp_id);
+					$("#update_rbs_bicycle_hire_status").attr("checked", data.rbs_bicycle_hire_status);
+					$("#update_rbs_bicycle_quality_status").val(data.rbs_bicycle_quality_status);
+			    });
+	}
+	
+	function updateRentA_BicycleStatus() {
+		$.post("/RentA_BicycleStatusCon/updateRentA_BicycleStatus.do", {
+			rbs_bp_id: $("input[name='update_rbs_bp_id']").val(),
+			rbs_bicycle_hire_status: $("input[name='update_rbs_bicycle_hire_status']:checked").val(),
+			rbs_bicycle_quality_status: $("select[name='update_rbs_bicycle_quality_status']").val()
+			},function(data){
+				  location.reload();
+				  alert("修改成功");
+			    });
+	}
+	
+	function getRentA_BicycleStatusByIdForTransfer(str) {
+		$.post("/RentA_BicycleStatusCon/getRentA_BicycleStatusById.do", {rbs_bp_id:str},function(data){
+					$("#transfer_rbs_bp_id").val(data.rbs_bp_id);
+			    });
+	}
+	
+	function transferRentA_BicycleStatus() {
+		$.post("/RentA_BicycleStatusCon/transferRentA_BicycleStatus.do", {
+			rbs_bp_id: $("input[name='transfer_rbs_bp_id']").val(),
+			rbs_rp_id: $("input[name='transfer_rbs_rp_id']").val()
+		},function(data){
+			  location.reload();
+		      alert("操作成功");
+		    });
+	}
+</script>
+</head>
+<body>
+
+<div class="header">
+  <ul class="nav justify-content-end nav-self-style">
+    <li class="nav-item">
+      <a class="nav-link" href="#"><img src="assets/images/user-icon.png" width="20px" height="20px"> 车辆质量信息</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="RentManagerLogout()"><img src="assets/images/logout-icon.png" width="20px" height="20px"> 退出</a>
+    </li>
+  </ul>
+</div>
+
+<div class="left-side nav-left-side">
+  <ul class="nav nav-pills flex-column">
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-rbm.html">车辆租借管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active"  href="rent-manager-rbs.html">车辆状况管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-rm.html">租借点管理员管理</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="rent-manager-info.html">消息通知</a>
+    </li>
+  </ul>
+</div>
+
+<!-- Tab panes -->
+<div class="content-side">
+    <div class="above">
+      <form class="form-inline">
+        <input type="text" class="form-control condition" name="findByRBS_BP_Id" placeholder="车辆ID">&nbsp;&nbsp;
+        <input type="text" class="form-control condition" name="findByRBS_Quality_Status" placeholder="车辆质量状态">&nbsp;&nbsp;
+        <label><input type="checkbox" class="condition"  name="findByRBS_Hire_Status">车辆租借状态</label>&nbsp;&nbsp;
+        <button type="button" class="btn btn-primary" onclick="getRentA_BicycleStatusByCondition()">搜索</button>
+      </form>
+    </div>
+    <div class="between">
+      <button type="button" class="btn btn-primary"  onclick="getRentA_BicycleStatusByPage()">查询</button>
+      <button type="button" class="btn btn-primary"  onclick="getAllRentA_BicycleStatusToPrevious()">上一页</button>
+      <button type="button" class="btn btn-primary"  onclick="getAllRentA_BicycleStatusToNext()">下一页</button>
+    </div>
+    <div class="below">
+      <div id="table-mes">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>车辆ID</th>
+              <th>车辆是否已被租借</th>
+              <th>质量质量状况</th>
+              <th>options</th>
+            </tr>
+          </thead>
+          <tbody id="mesContent">
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+
+<!-- 编辑车辆质量信息模态框 -->
+  <div class="modal fade" id="updateModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+   
+        <!-- 编辑车辆质量信息模态框头部 -->
+        <div class="modal-header">
+          <h4 class="modal-title">编辑车辆质量信息</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+   
+        <!-- 编辑车辆质量信息模态框主体 -->
+        <div class="modal-body">
+          <form>
+          <div class="form-group">
+              <label for="rbs_bp_id">车辆ID:</label>
+              <input type="text" class="form-control" id="update_rbs_bp_id" name="update_rbs_bp_id" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="rbs_bicycle_quality_status">车辆质量状态:</label>
+              <select class="form-control" name="update_rbs_bicycle_quality_status" id="update_rbs_bicycle_quality_status">
+			    <option value="正常">正常</option>
+			    <option value="损坏">损坏</option>
+			    <option value="丢失">丢失</option>
+			  </select>
+            </div>
+            <div class="form-check">
+		      <label class="rbs_bicycle_hire_status">
+		        <input type="checkbox" class="form-check-input" id="update_rbs_bicycle_hire_status" name="update_rbs_bicycle_hire_status">车辆是否已租借
+		      </label>
+		    </div>
+          </form>
+        </div>
+   
+        <!-- 编辑车辆质量信息模态框底部 -->
+        <div class="modal-footer">
+          <button type="button" onclick="updateRentA_BicycleStatus()" class="btn btn-primary">确定</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        </div>
+   
+      </div>
+    </div>
+  </div>
+  
+  <!-- 转移车辆质量信息模态框 -->
+  <div class="modal fade" id="transferModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+   
+        <!-- 转移车辆质量信息模态框头部 -->
+        <div class="modal-header">
+          <h4 class="modal-title">转移车辆质量信息</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+   
+        <!-- 转移车辆质量信息模态框主体 -->
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="rbs_bp_id">车辆ID:</label>
+              <input type="text" class="form-control" id="transfer_rbs_bp_id" name="transfer_rbs_bp_id" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="rbs_rp_id">转移到租借点:</label>
+              <input type="text" class="form-control" id="transfer_rbs_rp_id" name="transfer_rbs_rp_id">
+            </div>
+          </form>
+        </div>
+   
+        <!-- 转移车辆质量信息模态框底部 -->
+        <div class="modal-footer">
+          <button type="button" onclick="transferRentA_BicycleStatus()" class="btn btn-primary">确定</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        </div>
+   
+      </div>
+    </div>
+  </div>
+  
+</body>
+</html>
